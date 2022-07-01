@@ -1,3 +1,4 @@
+THIS IS A WORK IN PROGRESS
 # fdo-aio-demo
 This demonstrates FIDO Device Onboarding (FDO) using the FDO
 all-in-one packages.
@@ -20,7 +21,9 @@ Create the base image
     composer-cli blueprints push edge-blueprint.toml
     composer-cli compose start-ostree Edge edge-container
 
-Wait for about six minutes
+Wait for about six minutes. Confirm compose FINISHED with
+
+    composer-cli compose status
 
 ## Build the ISO installer image
 Download the container and import into local container storage
