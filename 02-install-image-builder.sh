@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+. $(dirname $0)/demo.conf
+
+[[ $EUID -ne 0 ]] && exit_on_error "Must run as root"
+
+##
+## Install the packages
+##
+
+dnf -y install osbuild-composer composer-cli cockpit-composer jq \
+    bash-completion container-tools
+
+##
+## Start the socket listeners
+##
+
+systemctl enable --now osbuild-composer.socket cockpit.socket
+
+##
+## Add user to weldr group
+##
+
+[[ ! -z "$SUDO_USER" ]] && usermod -aG weldr $SUDO_USER
+

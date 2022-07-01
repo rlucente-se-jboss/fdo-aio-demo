@@ -1,0 +1,51 @@
+---
+service_info:
+  initial_user: 
+    username: ${EDGE_USER}
+    sshkeys:
+    - "${EDGE_USER_PUB_KEY}"
+  files:
+  - path: /etc/rpm-ostreed.conf
+    permissions: 644
+    source_path: /etc/device0/cfg/etc/rpm-ostreed.conf 
+  - path: /etc/systemd/system/applyupdate.service
+    permissions: 644
+    source_path: /etc/device0/cfg/etc/systemd/system/applyupdate.service
+  - path: /etc/systemd/system/applyupdate.timer
+    permissions: 644
+    source_path: /etc/device0/cfg/etc/systemd/system/applyupdate.timer
+  - path: /etc/systemd/system/container-boinc.service
+    permissions: 644
+    source_path: /etc/device0/cfg/etc/systemd/system/container-boinc.service
+  commands: 
+  - command: mkdir
+    args:
+    - "/var/log/journal"
+  - command: mkdir
+    args:
+    - "-p" 
+    - "/opt/appdata/boinc/slots"
+  - command: mkdir
+    args:
+    - "-p" 
+    - "/opt/appdata/boinc/locale"
+  - command: systemctl
+    args:
+    - daemon-reload
+  - command: systemctl
+    args:
+    - enable 
+    - --now
+    - rpm-ostreed-automatic.timer 
+    - applyupdate.timer 
+    - podman-auto-update.timer 
+    - container-boinc.service
+  diskencryption_clevis: ~
+  additional_serviceinfo: ~
+bind: "0.0.0.0:8083"
+service_info_auth_token: ${SERVICE_AUTH_TOKEN}
+admin_auth_token: ${ADMIN_AUTH_TOKEN}
+device_specific_store_driver:
+  Directory:
+    path: /etc/fdo/aio/stores/serviceinfo_api_devices
+
