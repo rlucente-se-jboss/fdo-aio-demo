@@ -14,8 +14,7 @@ dnf -y install fdo-admin-cli
 ## Open firewall ports for FDO
 ##
 
-firewall-cmd --permanent --add-port=8000/tcp --add-port=8080/tcp \
-             --add-port=8081/tcp --add-port=8082/tcp --add-port=8083/tcp
+firewall-cmd --permanent --add-port=8000/tcp --add-port=8080-8083/tcp
 firewall-cmd --reload
 
 ##
