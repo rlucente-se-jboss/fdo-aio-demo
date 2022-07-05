@@ -14,21 +14,10 @@ service_info:
   - path: /etc/systemd/system/applyupdate.timer
     permissions: 644
     source_path: /etc/device0/cfg/etc/systemd/system/applyupdate.timer
-  - path: /etc/systemd/system/container-boinc.service
+  - path: /etc/systemd/system/container-httpd.service
     permissions: 644
-    source_path: /etc/device0/cfg/etc/systemd/system/container-boinc.service
+    source_path: /etc/device0/cfg/etc/systemd/system/container-httpd.service
   commands: 
-  - command: mkdir
-    args:
-    - "/var/log/journal"
-  - command: mkdir
-    args:
-    - "-p" 
-    - "/opt/appdata/boinc/slots"
-  - command: mkdir
-    args:
-    - "-p" 
-    - "/opt/appdata/boinc/locale"
   - command: systemctl
     args:
     - daemon-reload
@@ -39,7 +28,7 @@ service_info:
     - rpm-ostreed-automatic.timer 
     - applyupdate.timer 
     - podman-auto-update.timer 
-    - container-boinc.service
+    - container-httpd.service
   diskencryption_clevis: ~
   additional_serviceinfo: ~
 bind: "0.0.0.0:8083"
