@@ -23,6 +23,9 @@ service_info:
   - path: /etc/containers/registries.conf.d/999-insecure-registry.conf
     permissions: 644
     source_path: /etc/device0/cfg/etc/containers/registries.conf.d/999-insecure-registry.conf
+  - path: /etc/sudoers.d/999-edge-user
+    permissions: 644
+    source_path: /etc/device0/cfg/etc/sudoers.d/999-edge-user
   commands: 
   - command: firewall-cmd
     args:
