@@ -38,15 +38,27 @@ envsubst < serviceinfo_api_server.yml.template > serviceinfo_api_server.yml
 
 mv -f serviceinfo_api_server.yml $SERVICE_API_SERVER
 
-# generate systemd file for edge device container application
-
 cp -r device0 /etc
+
+# configure edge device to use insecure registry
+
+mkdir -p /etc/device0/cfg/etc/containers/registries.conf.d
+
+cat <<EOF > /etc/device0/cfg/etc/containers/registries.conf.d/999-insecure-registry.conf
+[[registry]]
+insecure = true
+location = "$FDO_SERVER:5000"
+EOF
+
+# generate systemd file for edge device container application
 
 podman create --rm --name httpd -p 8080:80 \
     --label io.containers.autoupdate=registry $FDO_SERVER:5000/httpd:prod
 podman generate systemd --files --new --name httpd
 cp container-httpd.service /etc/device0/cfg/etc/systemd/system/
 podman rm -f httpd
+
+# fix SELinux contexts
 
 restorecon -vFr /etc
 
