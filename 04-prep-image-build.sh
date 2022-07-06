@@ -28,9 +28,11 @@ version = "*"
 [[customizations.user]]
 name = "$EDGE_USER"
 description = "default edge user"
+password = "$(openssl passwd -6 $EDGE_PASS)"
 key = "$(cat id_$EDGE_USER.pub)"
 home = "/var/home/$EDGE_USER/"
 shell = "/usr/bin/bash"
+groups = [ "wheel" ]
 
 [[customizations.sshkey]]
 user = "$EDGE_USER"
