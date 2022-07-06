@@ -19,8 +19,6 @@ insecure = true
 location = "$FDO_SERVER:5000"
 EOF
 
-restorecon -vFr /var/lib/registry /etc/containers
-
 ##
 ## Create systemd unit files for registry service
 ##
@@ -40,7 +38,8 @@ podman rm -f --all
 ##
 
 cp container-registry.service /etc/systemd/system
-restorecon -vFr /etc/systemd/system
+restorecon -vFr /etc /var/lib/registry
+
 systemctl daemon-reload
 systemctl enable --now container-registry.service
 
