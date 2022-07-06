@@ -65,16 +65,18 @@ cat <<EOF > /etc/device0/cfg/etc/sudoers.d/999-edge-user
 $EDGE_USER  ALL=(ALL)	NOPASSWD: ALL
 EOF
 
-# fix SELinux contexts
-
-restorecon -vFr /etc
-
 ##
 ## Disable TPM on edge device
 ##
 
 AIO_CONFIG=/etc/fdo/aio/aio_configuration
 sed -i.bak 's/\(manufacturing_disable_key_storage_tpm:\) false/\1 true/g' $AIO_CONFIG
+
+##
+## Fix SELinux contexts
+##
+
+restorecon -vFr /etc
 
 ##
 ## Restart the FDO all-in-one service
