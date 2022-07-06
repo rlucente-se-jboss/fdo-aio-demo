@@ -58,6 +58,13 @@ podman generate systemd --files --new --name httpd
 cp container-httpd.service /etc/device0/cfg/etc/systemd/system/
 podman rm -f httpd
 
+# enable passwordless sudo for EDGE_USER
+
+mkdir -p /etc/device0/cfg/etc/sudoers.d
+cat <<EOF > /etc/device0/cfg/etc/sudoers.d/999-edge-user
+$EDGE_USER  ALL=(ALL)	NOPASSWD: ALL
+EOF
+
 # fix SELinux contexts
 
 restorecon -vFr /etc
