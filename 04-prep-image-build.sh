@@ -31,7 +31,6 @@ description = "default edge user"
 key = "$(cat id_$EDGE_USER.pub)"
 home = "/var/home/$EDGE_USER/"
 shell = "/usr/bin/bash"
-groups = ["wheel"]
 
 [[customizations.sshkey]]
 user = "$EDGE_USER"
