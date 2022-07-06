@@ -25,7 +25,7 @@ restorecon -vFr /var/lib/registry /etc/containers
 ## Create systemd unit files for registry service
 ##
 
-CTR_ID=$(podman run --privileged -d --name registry -p 5000:5000 -v /var/lib/registry:/var/lib/registry:Z --restart=always docker.io/library/registry:2)
+CTR_ID=$(podman run --rm --privileged -d --name registry -p 5000:5000 -v /var/lib/registry:/var/lib/registry:z docker.io/library/registry:2)
 podman generate systemd --new --files --name $CTR_ID
 
 ##
