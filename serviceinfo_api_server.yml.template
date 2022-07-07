@@ -24,6 +24,10 @@ service_info:
     permissions: 644
     source_path: /etc/device0/cfg/etc/containers/registries.conf.d/999-insecure-registry.conf
   commands: 
+  - command: restorecon
+    args:
+    - -vFr
+    - /etc
   - command: firewall-cmd
     args:
     - --permanent
