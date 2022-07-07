@@ -17,13 +17,21 @@ service_info:
   - path: /etc/systemd/system/container-httpd.service
     permissions: 644
     source_path: /etc/device0/cfg/etc/systemd/system/container-httpd.service
-  - path: /etc/systemd/system/podman-auto-update.timer.d/override.conf
+  - path: /tmp/override.conf
     permissions: 644
     source_path: /etc/device0/cfg/etc/systemd/system/podman-auto-update.timer.d/override.conf
   - path: /etc/containers/registries.conf.d/999-insecure-registry.conf
     permissions: 644
     source_path: /etc/device0/cfg/etc/containers/registries.conf.d/999-insecure-registry.conf
-  commands: 
+  commands:
+  - command: mkdir
+    args:
+    - -p
+    - /etc/systemd/system/podman-auto-update.timer.d
+  - command: cp
+    args:
+    - /tmp/override.conf
+    - /etc/systemd/system/podman-auto-update.timer.d
   - command: restorecon
     args:
     - -vFr
