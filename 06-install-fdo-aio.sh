@@ -70,6 +70,25 @@ AIO_CONFIG=/etc/fdo/aio/aio_configuration
 sed -i.bak 's/\(manufacturing_disable_key_storage_tpm:\) false/\1 true/g' $AIO_CONFIG
 
 ##
+## Remove unnecessary IP addresses in FDO AIO configuration files
+##
+
+for ipaddr in $(grep IpAddr $AIO_CONFIG | awk '{print $3}' | sed 's/"//g' | \
+    grep -v $FDO_SERVER | sort -u)
+do
+    sed -i '/'$ipaddr'/d' $AIO_CONFIG
+    sed -i '/'$ipaddr'/d' /etc/fdo/aio/configs/owner_onboarding_server.yml
+
+    # This awk expression removes the line before the pattern, the
+    # pattern, and two lines after the pattern
+    # See https://red.ht/3amgyAt.
+
+    awk '/'$ipaddr'/{for(x=NR-1;x<=NR+2;x++)d[x];}{a[NR]=$0}END{for(i=1;i<=NR;i++)if(!(i in d))print a[i]}' \
+        /etc/fdo/aio/configs/manufacturing_server.yml > tmp.out
+    mv tmp.out /etc/fdo/aio/configs/manufacturing_server.yml
+done
+
+##
 ## Fix SELinux contexts
 ##
 
