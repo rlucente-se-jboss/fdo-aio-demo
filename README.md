@@ -137,6 +137,12 @@ following command to identify the correct one.
 
     composer-cli compose status
 
+On my system, the output looks like the following where the UUID
+is the first column:
+
+    $ composer-cli compose status
+    c11e41be-b6f0-4813-8eb4-a6094de1eb86 FINISHED Thu Jul 7 19:15:40 2022 Edge            0.0.1 edge-container
+
 If there's only one rpm-ostree image, you can simply hit tab on the
 following command to autofill the UUID of the image to download.
 
