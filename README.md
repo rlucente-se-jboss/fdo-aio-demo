@@ -1,4 +1,3 @@
-THIS IS A WORK IN PROGRESS
 # fdo-aio-demo
 This demonstrates FIDO Device Onboarding (FDO) using the FDO
 all-in-one packages on RHEL 9. This demonstration will build an ISO
