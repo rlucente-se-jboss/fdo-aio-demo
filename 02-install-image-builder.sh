@@ -9,7 +9,11 @@
 ##
 
 dnf -y install osbuild-composer composer-cli cockpit-composer jq \
-    bash-completion container-tools
+    bash-completion
+
+grep VERSION_ID /etc/os-release | grep -q '9\.' && \
+    dnf -y install container-tools || \
+    dnf -y module install container-tools
 
 ##
 ## Start the socket listeners
