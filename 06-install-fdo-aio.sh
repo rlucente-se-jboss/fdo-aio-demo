@@ -55,12 +55,12 @@ EOF
 systemctl restart container-registry.service
 
 # generate systemd file for edge device container application
-
-podman create --rm --name httpd -p 8080:80 \
-    --label io.containers.autoupdate=registry $FDO_SERVER:5000/httpd:prod
-podman generate systemd --files --new --name httpd
-cp container-httpd.service /etc/device0/cfg/etc/systemd/system/
-podman rm -f httpd
+podman create --rm --name howsmysalute \
+    --security-opt label=disable --device /dev/video0 -p 8080:8080 \
+    --label io.containers.autoupdate=registry $FDO_SERVER:5000/howsmysalute:prod
+podman generate systemd --files --new --name howsmysalute
+cp container-howsmysalute.service /etc/device0/cfg/etc/systemd/system/
+podman rm -f howsmysalute
 
 ##
 ## Disable TPM on edge device

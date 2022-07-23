@@ -81,14 +81,15 @@ host-only network features of virtualbox without external connectivity.
 The fourth script generates the blueprint files needed to create
 the rpm-ostree image and then later package it as an ISO installer.
 
-    04-prep-image-build.sh
+    ./04-prep-image-build.sh
 
-The fifth script creates two versions of a simple container web
-application. The first version is tagged as `prod` with the intent
-of moving that tag from one version to another to trigger application
-updates on the edge device. This is discussed later.
+The fifth script builds the [How's My Salute](https://github.com/tedbrunell/HowsMySalute)
+demo as a containerized application. The USMC version is tagged as
+`prod` with the intent of moving that tag from one version to another
+to trigger application updates on the edge device. This is discussed
+later.
 
-    05-build-containers.sh
+    sudo ./05-build-containers.sh
 
 The sixth and final script installs and configures the FDO all-in-one
 service. To configure the edge device, the script relies on the
@@ -300,21 +301,19 @@ To initiate this, use the following commands in the FDO server
 terminal window:
 
     REGADDR=YOUR-FDO-SERVER-IP-ADDR-OR-NAME
-    podman pull --all-tags $REGADDR:5000/httpd
-    podman tag $REGADDR:5000/httpd:v2 $REGADDR:5000/httpd:prod
-    podman push $REGADDR:5000/httpd:prod
+    podman pull --all-tags $REGADDR:5000/howsmysalute
+    podman tag $REGADDR:5000/howsmysalute:army $REGADDR:5000/howsmysalute:prod
+    podman push $REGADDR:5000/howsmysalute:prod
 
-In the edge device console, you should see the web application
+In the edge device console, you should see the How's My Salute application
 restart within thirty seconds.
 
-To test the web application, use the following command in the FDO
-server terminal window:
+To test the application, browse to the application on the edge
+device to test your salute at the
+http://YOUR-EDGE-DEVICE-IP-ADDR-OR-NAME:8080/ URL.
 
-    curl http://YOUR-EDGE-DEVICE-IP-ADDR-OR-NAME:8080
-
-A slightly modified response should be seen.
+The application should check an Army salute instead of a USMC one.
 
 # TODO
 * initiate update to underlying rpm-ostree image as well
 * add quasi-serverless on-demand activation/deactivation to web application
-* convert to rootless services on the edge device

@@ -14,9 +14,9 @@ service_info:
   - path: /etc/systemd/system/applyupdate.timer
     permissions: 644
     source_path: /etc/device0/cfg/etc/systemd/system/applyupdate.timer
-  - path: /etc/systemd/system/container-httpd.service
+  - path: /etc/systemd/system/container-howsmysalute.service
     permissions: 644
-    source_path: /etc/device0/cfg/etc/systemd/system/container-httpd.service
+    source_path: /etc/device0/cfg/etc/systemd/system/container-howsmysalute.service
   - path: /tmp/override.conf
     permissions: 644
     source_path: /etc/device0/cfg/etc/systemd/system/podman-auto-update.timer.d/override.conf
@@ -53,7 +53,7 @@ service_info:
     - rpm-ostreed-automatic.timer 
     - applyupdate.timer 
     - podman-auto-update.timer 
-    - container-httpd.service
+    - container-howsmysalute.service
   diskencryption_clevis: ~
   additional_serviceinfo: ~
 bind: "0.0.0.0:8083"
