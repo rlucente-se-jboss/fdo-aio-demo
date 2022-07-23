@@ -51,7 +51,6 @@ location = "$FDO_SERVER:5000"
 EOF
 
 # make sure the local registry is ready
-
 systemctl restart container-registry.service
 
 # generate systemd file for edge device container application
