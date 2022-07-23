@@ -17,6 +17,7 @@ dnf -y install git
 REPO_ID=$FDO_SERVER:5000/howsmysalute
 
 git clone https://github.com/tedbrunell/HowsMySalute.git
+cd HowsMySalute
 podman build --layers=false -t $REPO_ID:usmc .
 podman push $REPO_ID:usmc
 
