@@ -81,14 +81,14 @@ host-only network features of virtualbox without external connectivity.
 The fourth script generates the blueprint files needed to create
 the rpm-ostree image and then later package it as an ISO installer.
 
-    04-prep-image-build.sh
+    ./04-prep-image-build.sh
 
 The fifth script creates two versions of a simple container web
 application. The first version is tagged as `prod` with the intent
 of moving that tag from one version to another to trigger application
 updates on the edge device. This is discussed later.
 
-    05-build-containers.sh
+    ./05-build-containers.sh
 
 The sixth and final script installs and configures the FDO all-in-one
 service. To configure the edge device, the script relies on the
