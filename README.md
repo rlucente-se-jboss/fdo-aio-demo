@@ -1,18 +1,20 @@
 # fdo-aio-demo
 This demonstrates FIDO Device Onboarding (FDO) using the FDO
-all-in-one packages on RHEL 9. This demonstration will build an ISO
-installer for an edge device and then leverage the FDO protocol to
-provision the device with a simple container application and a timer
-to periodically update the application.
+all-in-one packages on RHEL 8/9. This demonstration will build an
+ISO installer for an edge device and then leverage the FDO protocol
+to provision the device with the [How's My Salute](https://github.com/tedbrunell/HowsMySalute)
+application and a timer to periodically check for application
+updates. After FDO provisioning, the edge device will run the
+application in kiosk mode. You'll need an external USB webcam and
+monitor for this demonstration.
 
 ## Install a RHEL instance for the FDO server
-Start with a minimal install of RHEL 9. Make sure this repository
-is on your RHEL host using either `git clone` or secure copy (`scp`).
-You'll run two virtual or physical machines.  If running virtual
-machines on the same host for this demo, please ensure that there
-are adequate resources for them. My personal laptop has 32 GB of
-memory and 8 cores (16 hyperthreads) so I allocate the following
-to the guest VMs:
+Start with a minimal install of RHEL 8 or 9. Make sure this repository
+is copied to your RHEL host. You'll run two virtual or physical
+machines. If running virtual machines on the same host for this
+demo, please ensure that there are adequate resources for them. My
+personal laptop has 32 GB of memory and 8 cores (16 hyperthreads)
+so I allocate the following to the guest VMs:
 
 * RHEL guest for image-builder, registry, and FDO server: 10 GB, 6 vCPUs
 * Edge RHEL guest: 6 GB, 2 vCPUs
@@ -33,43 +35,51 @@ with `sudo` privileges.
 
 ### Adjust demo settings
 These instructions assume that the `fdo-aio-demo` git repository
-is cloned or copied to your user's home directory on the builder
-RHEL guest.
+is copied to your own home directory on the RHEL FDO server.
 
 You'll need to customize the settings in the `demo.conf` script to
 include your Red Hat Subscription Manager (RHSM) credentials to
 login to the [customer support portal](https://access.redhat.com)
 to pull updated content. The `FDO_SERVER` setting should be an
-address on the network that the three guests will use to communicate
-with one another. On my laptop, this is the host-only network. The
-`EDGE_USER`, `EDGE_PASS`, and `EDGE_STORAGE_DEV` parameters define
-the login information for the virtual edge device as well as the
-base storage device. The default storage device is correct for
-VirtualBox but may be different for another solution. Adjust
-accordingly.
+address that the edge device will use to communicate with the FDO
+server. On my laptop, this is the IP address assigned to the host-only
+network interface on the FDO server. The `EDGE_USER`, `EDGE_PASS`,
+and `EDGE_STORAGE_DEV` parameters define the login information for
+the virtual edge device as well as the base storage device. The
+default storage device is correct for VirtualBox but may be different
+for another solution. Finally, the EDGE_CLIENT is the IP address
+for the edge device itself. My VirtualBox host-only DHCP server is
+configured to give predictable IP addresses to both the FDO server
+and the Edge client. Make sure to do something similar for your
+environment and/or adjust both the `FDO_SERVER` and `EDGE_CLIENT`
+settings in the `demo.conf` file.
 
 ## Configure the FDO server
 The shell scripts included in this repository handle setting up all
 the dependencies to support the demo. To begin, go to the directory
 hosting this repository.
 
-    cd ~/fdo-aio-demoa
+    cd ~/fdo-aio-demo
 
-The first script registers with the [Red Hat Customer
-Portal](https://access.redhat.com) using the credentials provided
-in the `demo.conf` file. All packages are updated. It's a good idea
-to reboot after as the kernel may have been updated.
+The first script registers with the [Red Hat Customer Portal](https://access.redhat.com)
+using the credentials provided in the `demo.conf` file. All packages
+are updated. It's a good idea to reboot after as the kernel may
+have been updated.
 
     sudo ./01-setup-rhel.sh
     reboot
 
-The second script installs the packages for the rpm-ostree image
-builder as well as enabling the web console with the image builder
-plugin. The web console can be accessed via the
-https://YOUR-FDO-SERVER-IP-ADDR-OR-NAME:9090 URL.
+The second script installs several packages including the rpm-ostree
+image builder as well as enabling the web console with the image
+builder plugin. The web console can be accessed via the
+https://YOUR-FDO-SERVER-IP-ADDR-OR-NAME:9090 URL. The current user
+is added to the `weldr` group to support use of image builder within
+the web console. Please make sure to log out and then log in again
+to update the group memberships for your session.
 
     cd ~/fdo-aio-demoa
     sudo ./02-install-image-builder.sh
+    exit
 
 The third script configures a docker v2 registry to enable edge
 devices to pull container images without requiring external network
@@ -77,6 +87,11 @@ access.  Once this demo is installed, I can easily run it using the
 host-only network features of virtualbox without external connectivity.
 
     sudo ./03-config-registry.sh
+
+Test that the container registry is up and running using the following
+command:
+
+    curl -s http://YOUR-FDO-SERVER-IP-ADDR-OR-NAME:5000/v2/_catalog | jq
 
 The fourth script generates the blueprint files needed to create
 the rpm-ostree image and then later package it as an ISO installer.
@@ -91,19 +106,32 @@ later.
 
     sudo ./05-build-containers.sh
 
+Verify that the application is in the registry using the following
+command:
+
+    curl -s http://YOUR-FDO-SERVER-IP-ADDR-OR-NAME:5000/v2/_catalog | jq
+
 The sixth and final script installs and configures the FDO all-in-one
 service. To configure the edge device, the script relies on the
 files in the `device0` folder as well as the
 `serviceinfo_api_server.yml.template` file for the installation
-commands. After the script is run, you can find the files used to
-configure the edge device at:
+commands.
 
-    /etc/device0/cfg
-    /etc/fdo/aio/configs/serviceinfo_api_server.yml
+NB: Generating the systemd service file for the application requires
+creating a container. The container creation will fail if no webcam
+device is attached to the FDO server. Make sure when running this
+script that a webcam is attached and the `/dev/video0` device exists.
 
-Run the script to install and configure the FDO all-in-one components.
+Run the script to install and configure the FDO all-in-one components
+and setup the edge device FDO configuration files..
 
     sudo ./06-install-fdo-aio.sh
+
+After the script is run, you can review the content of the files
+used to configure the edge device.
+
+    find /etc/device0/cfg -type f -print -exec cat {} \; | less
+    less /etc/fdo/aio/configs/serviceinfo_api_server.yml
 
 At this point, the needed software components have been installed
 to support the demo.

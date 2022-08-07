@@ -13,7 +13,7 @@ ssh-keygen -f $HOME/.ssh/id_$EDGE_USER -t rsa -P "" \
 cp $HOME/.ssh/id_$EDGE_USER.pub .
 
 ##
-## Create the edge blueprint file
+## Create the edge blueprint file for an edge device in kiosk mode
 ##
 
 cat > edge-blueprint.toml <<EOF
@@ -21,8 +21,109 @@ name = "Edge"
 description = ""
 version = "0.0.1"
 
+EOF
+
+if grep VERSION_ID /etc/os-release | grep -q '9\.'
+then
+    cat >> edge-blueprint.toml <<EOF
 [[packages]]
 name = "container-tools"
+version = "*"
+EOF
+else
+    # all of these packages mirror the container-tools module
+    cat >> edge-blueprint.toml <<EOF
+[[packages]]
+name = "buildah"
+version = "*"
+
+[[packages]]
+name = "cockpit-podman"
+version = "*"
+
+[[packages]]
+name = "conmon"
+version = "*"
+
+[[packages]]
+name = "container-selinux"
+version = "*"
+
+[[packages]]
+name = "containernetworking-plugins"
+version = "*"
+
+[[packages]]
+name = "containers-common"
+version = "*"
+
+[[packages]]
+name = "criu"
+version = "*"
+
+[[packages]]
+name = "crun"
+version = "*"
+
+[[packages]]
+name = "fuse-overlayfs"
+version = "*"
+
+[[packages]]
+name = "libslirp"
+version = "*"
+
+[[packages]]
+name = "podman"
+version = "*"
+
+[[packages]]
+name = "python3-podman"
+version = "*"
+
+[[packages]]
+name = "runc"
+version = "*"
+
+[[packages]]
+name = "skopeo"
+version = "*"
+
+[[packages]]
+name = "slirp4netns"
+version = "*"
+
+[[packages]]
+name = "toolbox"
+version = "*"
+
+[[packages]]
+name = "udica"
+version = "*"
+
+[[packages]]
+name = "setroubleshoot-server"
+version = "*"
+
+# appears to be a missing gdm dependency for RHEL 8
+[[packages]]
+name = "flatpak-selinux"
+version = "*"
+
+EOF
+fi
+
+cat >> edge-blueprint.toml <<EOF
+[[packages]]
+name = "gdm"
+version = "*"
+
+[[packages]]
+name = "gnome-session-kiosk-session"
+version = "*"
+
+[[packages]]
+name = "firefox"
 version = "*"
 
 [[customizations.user]]
@@ -30,7 +131,7 @@ name = "$EDGE_USER"
 description = "default edge user"
 password = "$(openssl passwd -6 $EDGE_PASS)"
 key = "$(cat id_$EDGE_USER.pub)"
-home = "/var/home/$EDGE_USER/"
+home = "/home/$EDGE_USER/"
 shell = "/usr/bin/bash"
 groups = [ "wheel" ]
 
@@ -59,4 +160,3 @@ installation_device = "$EDGE_STORAGE_DEV"
 manufacturing_server_url = "http://$FDO_SERVER:8080"
 diun_pub_key_insecure = "true"
 EOF
-

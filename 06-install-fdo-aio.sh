@@ -4,6 +4,10 @@
 
 [[ $EUID -ne 0 ]] && exit_on_error "Must run as root"
 
+# verify that a video device is connected to the server
+ERRMSG="No video device (/dev/video0) found. Container creation will fail."
+[[ ! -e /dev/video0 ]] && exit_on_error "$ERRMSG"
+
 ##
 ## Install the packages
 ##
@@ -29,6 +33,7 @@ systemctl enable --now fdo-aio
 
 SERVICE_API_SERVER="/etc/fdo/aio/configs/serviceinfo_api_server.yml"
 
+# give the FDO services a few seconds to start up
 while [[ ! -f $SERVICE_API_SERVER ]]; do sleep 1; done
 
 export SERVICE_AUTH_TOKEN="$(grep service_info_auth_token $SERVICE_API_SERVER | awk '{print $2}')"
@@ -60,6 +65,28 @@ podman create --rm --name howsmysalute \
 podman generate systemd --files --new --name howsmysalute
 cp container-howsmysalute.service /etc/device0/cfg/etc/systemd/system/
 podman rm -f howsmysalute
+
+# enable kiosk mode for edge user
+mkdir -p /etc/device0/cfg/var/lib/AccountsService/users
+cat > /etc/device0/cfg/var/lib/AccountsService/users/${EDGE_USER} << EOF
+[User]
+Session=com.redhat.Kiosk
+SystemAccount=false
+EOF
+
+# enable firefox in kiosk mode
+mkdir -p /etc/device0/cfg/home/$EDGE_USER/.local/bin
+cat > /etc/device0/cfg/home/$EDGE_USER/.local/bin/redhat-kiosk << EOF
+#!/bin/sh
+while true; do
+    curl -s --head --request GET http://$EDGE_CLIENT:8080 | grep -q "200 OK" && break
+    sleep 1
+done
+
+while true; do
+    firefox -kiosk http://$EDGE_CLIENT:8080
+done
+EOF
 
 ##
 ## Disable TPM on edge device
