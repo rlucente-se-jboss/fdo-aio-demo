@@ -97,6 +97,11 @@ service_info:
     - applyupdate.timer 
     - podman-auto-update.timer 
     - container-howsmysalute.service
+  - command: sed
+    args:
+    - -i.bak
+    - 's/^\(SELINUX=\)enforcing/\1permissive/g'
+    - /etc/selinux/config
   - command: semodule
     args:
     - -DB
