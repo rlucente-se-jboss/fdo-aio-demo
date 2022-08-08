@@ -80,6 +80,15 @@ service_info:
     - -i.bak
     - '/^\[daemon\]/a AutomaticLoginEnable=True\nAutomaticLogin=${EDGE_USER}\n'
     - /etc/gdm/custom.conf
+  - command: setsebool
+    args:
+    - -P
+    - container_use_devices=1
+  - command: sed
+    args:
+    - -i.bak
+    - 's/^\(SELINUX=\)enforcing/\1permissive/g'
+    - /etc/selinux/config
   - command: restorecon
     args:
     - -vFr
@@ -97,11 +106,6 @@ service_info:
     - applyupdate.timer 
     - podman-auto-update.timer 
     - container-howsmysalute.service
-  - command: sed
-    args:
-    - -i.bak
-    - 's/^\(SELINUX=\)enforcing/\1permissive/g'
-    - /etc/selinux/config
   - command: semodule
     args:
     - -DB
