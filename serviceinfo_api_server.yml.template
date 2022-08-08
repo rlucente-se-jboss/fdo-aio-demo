@@ -30,27 +30,6 @@ service_info:
     permissions: 755
     source_path: /etc/device0/cfg/home/$EDGE_USER/.local/bin/redhat-kiosk
   commands:
-  - command: systemctl
-    args:
-    - isolate
-    - multi-user.target
-  - command: mkdir
-    args:
-    - -p
-    - /var/lib/AccountsService/users
-  - command: cp
-    args:
-    - /tmp/${EDGE_USER}
-    - /var/lib/AccountsService/users/${EDGE_USER}
-  - command: cp
-    args:
-    - /usr/share/accountsservice/user-templates/standard
-    - /etc/accountsservice/user-templates/standard
-  - command: sed
-    args:
-    - -i.bak
-    - 's/Session=.*/Session=com.redhat.Kiosk\nSystemAccount=false/g'
-    - /etc/accountsservice/user-templates/standard
   - command: mkdir
     args:
     - -p
@@ -59,11 +38,6 @@ service_info:
     args:
     - /tmp/override.conf
     - /etc/systemd/system/podman-auto-update.timer.d
-  - command: sed
-    args:
-    - -i.bak
-    - '/^\[daemon\]/a AutomaticLoginEnable=True\nAutomaticLogin=${EDGE_USER}\n'
-    - /etc/gdm/custom.conf
   - command: mkdir
     args:
     - -p
@@ -77,12 +51,6 @@ service_info:
     - -R
     - ${EDGE_USER}:${EDGE_USER}
     - /home/${EDGE_USER}
-  - command: restorecon
-    args:
-    - -vFr
-    - /etc
-    - /home
-    - /var
   - command: firewall-cmd
     args:
     - --permanent
@@ -90,6 +58,34 @@ service_info:
   - command: firewall-cmd
     args:
     - --reload
+  - command: cp
+    args:
+    - /usr/share/accountsservice/user-templates/standard
+    - /etc/accountsservice/user-templates/standard
+  - command: sed
+    args:
+    - -i.bak
+    - 's/Session=.*/Session=com.redhat.Kiosk\nSystemAccount=false/g'
+    - /etc/accountsservice/user-templates/standard
+  - command: mkdir
+    args:
+    - -p
+    - /var/lib/AccountsService/users
+  - command: cp
+    args:
+    - /tmp/${EDGE_USER}
+    - /var/lib/AccountsService/users/${EDGE_USER}
+  - command: sed
+    args:
+    - -i.bak
+    - '/^\[daemon\]/a AutomaticLoginEnable=True\nAutomaticLogin=${EDGE_USER}\n'
+    - /etc/gdm/custom.conf
+  - command: restorecon
+    args:
+    - -vFr
+    - /etc
+    - /home
+    - /var
   - command: systemctl
     args:
     - daemon-reload
