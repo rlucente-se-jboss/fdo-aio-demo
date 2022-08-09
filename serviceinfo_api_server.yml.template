@@ -84,11 +84,6 @@ service_info:
     args:
     - -P
     - container_use_devices=1
-  - command: sed
-    args:
-    - -i.bak
-    - 's/^\(SELINUX=\)enforcing/\1permissive/g'
-    - /etc/selinux/config
   - command: restorecon
     args:
     - -vFr
@@ -106,9 +101,6 @@ service_info:
     - applyupdate.timer 
     - podman-auto-update.timer 
     - container-howsmysalute.service
-  - command: semodule
-    args:
-    - -DB
   - command: shutdown
     args:
     - -r
