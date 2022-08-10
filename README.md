@@ -3,31 +3,33 @@ This demonstrates FIDO Device Onboarding (FDO) using the FDO
 all-in-one packages on RHEL 8/9. This demonstration will build an
 ISO installer for an edge device and then leverage the FDO protocol
 to provision the device with the [How's My Salute](https://github.com/tedbrunell/HowsMySalute)
-application and a timer to periodically check for application
-updates. After FDO provisioning, the edge device will run the
-application in kiosk mode. You'll need an external USB webcam and
-monitor for this demonstration.
+application and a timer and service to periodically check for and
+apply any application updates. After FDO provisioning, the edge
+device will run the application in kiosk mode. You'll need an
+external USB webcam and monitor for this demonstration.
 
 ## Install a RHEL instance for the FDO server
 Start with a minimal install of RHEL 8 or 9. Make sure this repository
-is copied to your RHEL host. You'll run two virtual or physical
-machines. If running virtual machines on the same host for this
-demo, please ensure that there are adequate resources for them. My
-personal laptop has 32 GB of memory and 8 cores (16 hyperthreads)
-so I allocate the following to the guest VMs:
+is copied to your RHEL host. You'll run an FDO server and an edge
+device. These can be either virtual or physical machines. If running
+virtual machines on the same host for this demo, please ensure that
+there are adequate resources for them. My personal laptop has 32
+GB of memory and 8 cores (16 hyperthreads) so I allocate the following
+to the guest VMs:
 
 * RHEL guest for image-builder, registry, and FDO server: 10 GB, 6 vCPUs
 * Edge RHEL guest: 6 GB, 2 vCPUs
 
-The two VMs will collectively consume half the resources for my
-laptop.
+The two guest VMs above will collectively consume half the resources
+for my laptop.
 
-The two VMs will need to communicate with one another. Only the FDO
-server RHEL guest needs outside connectivity. How you do this depends
-on your virtualization solution. I use VirtualBox on my OSX laptop
-so I configure networking like so:
+Both the FDO server and the edge device need to communicate with
+one another. Only the FDO server needs outside connectivity. How
+you do this depends on your physical or virtualization solution.
+For guest VMs, I use VirtualBox on my OSX laptop so I configure
+networking like so:
 
-* FDO Server RHEL guest: one NAT interface and one host-only interface
+* RHEL guest for FDO server: one NAT interface and one host-only interface
 * Edge RHEL guest: one host-only interface
 
 During the FDO server RHEL installation, configure a regular user
@@ -35,7 +37,7 @@ with `sudo` privileges.
 
 ### Adjust demo settings
 These instructions assume that the `fdo-aio-demo` git repository
-is copied to your own home directory on the RHEL FDO server.
+is copied to your own home directory on your FDO server instance.
 
 You'll need to customize the settings in the `demo.conf` script to
 include your Red Hat Subscription Manager (RHSM) credentials to
@@ -72,12 +74,14 @@ have been updated.
 The second script installs several packages including the rpm-ostree
 image builder as well as enabling the web console with the image
 builder plugin. The web console can be accessed via the
-https://YOUR-FDO-SERVER-IP-ADDR-OR-NAME:9090 URL. The current user
-is added to the `weldr` group to support use of image builder within
-the web console. Please make sure to log out and then log in again
-to update the group memberships for your session.
+https://YOUR-FDO-SERVER-IP-ADDR-OR-NAME:9090 URL where
+YOUR-FDO-SERVER-IP-ADDR-OR-NAME matches the DNS name or IP address
+of your FDO server. The current user is added to the `weldr` group
+to support use of image builder within the web console. Please make
+sure to log out and then log in again to update the group memberships
+for your session.
 
-    cd ~/fdo-aio-demoa
+    cd ~/fdo-aio-demo
     sudo ./02-install-image-builder.sh
     exit
 
@@ -93,13 +97,16 @@ command:
 
     curl -s http://YOUR-FDO-SERVER-IP-ADDR-OR-NAME:5000/v2/_catalog | jq
 
+where YOUR-FDO-SERVER-IP-ADDR-OR-NAME matches the DNS name or IP
+address of your FDO server.
+
 The fourth script generates the blueprint files needed to create
 the rpm-ostree image and then later package it as an ISO installer.
 
     ./04-prep-image-build.sh
 
 The fifth script builds the [How's My Salute](https://github.com/tedbrunell/HowsMySalute)
-demo as a containerized application. The USMC version is tagged as
+demo as a containerized application. The US Army version is tagged as
 `prod` with the intent of moving that tag from one version to another
 to trigger application updates on the edge device. This is discussed
 later.
@@ -110,6 +117,23 @@ Verify that the application is in the registry using the following
 command:
 
     curl -s http://YOUR-FDO-SERVER-IP-ADDR-OR-NAME:5000/v2/_catalog | jq
+
+where YOUR-FDO-SERVER-IP-ADDR-OR-NAME matches the DNS name or IP
+address of your FDO server.
+
+If you need to rebuild the container web applications, run the
+following commands to clear out the current images and remove the
+local HowsMySalute folder:
+
+    REPOID=YOUR-FDO-SERVER-IP-ADDR-OR-NAME:5000/howsmysalute
+    sudo podman rmi -f $REPOID:usmc
+    sudo podman rmi -f $REPOID:army
+    sudo podman rmi -f $REPOID:prod
+    sudo rm -fr HowsMySalute
+    sudo ./05-build-containers.sh
+
+where YOUR-FDO-SERVER-IP-ADDR-OR-NAME matches the DNS name or IP
+address of your FDO server.
 
 The sixth and final script installs and configures the FDO all-in-one
 service. To configure the edge device, the script relies on the
@@ -123,7 +147,7 @@ device is attached to the FDO server. Make sure when running this
 script that a webcam is attached and the `/dev/video0` device exists.
 
 Run the script to install and configure the FDO all-in-one components
-and setup the edge device FDO configuration files..
+and setup the edge device FDO configuration files.
 
     sudo ./06-install-fdo-aio.sh
 
@@ -223,7 +247,10 @@ Download the ISO installer using the command:
 
 The ISO can now be used to install an edge device. I subsequently
 downloaded this ISO file from the RHEL host VM to my laptop so I
-could use it to install a second VM for the edge device.
+could use it to install a second VM for the edge device. If working
+with a physical edge device, put the ISO file onto a USB thumb
+drive. There are ample instructions and tools available on how to
+do that.
 
 ## Demonstrate FIDO Device Onboarding (FDO)
 The process and steps necessary for FDO are explained in the
@@ -233,58 +260,58 @@ The above setup has reached step 9 in
 of the FDO process description.
 
 ### Monitor the server processes
-It's helpful to watch the various components of the FDO process
-interact during device initialization and then onboarding. Open a
-terminal window to your FDO server and type the following commands:
+It's helpful to watch the activity of the various FDO services
+during device initialization and then onboarding. Open a terminal
+window to your FDO server and type the following commands:
 
     cd /etc/fdo/aio/logs
     sudo truncate -s 0 *.log
     watch ls -lat
 
-You'll now be monitoring the logs of the various FDO applications
-and you'll be able to see when they are updated during the process.
+You'll now be monitoring the logs of the various FDO services and
+you'll be able to see when they are updated during the process.
 
 ### Create and boot a virtual edge device
 You'll need to create and boot a virtual or a physical edge device
-that can reach your FDO server. I create a virtual edge device using
-VirtualBox on my Mac laptop for this and there's too much to describe
-here on how to create and launch a virtual machine. For this demo,
-the edge device (physical or virtual) must meet the following
-criteria:
+that has network connectivity to your FDO server. I create a virtual
+edge device using VirtualBox on my Mac laptop for this and there's
+too much to describe here on how to create and launch a virtual
+machine. For this demo, the edge device (physical or virtual) must
+meet the following criteria:
 
 * Available network connectivity between the FDO server and the edge device
 * Ability to monitor the edge device during installation and reboot (a virtual console or monitor for physical device)
-* The ISO installer is accessible to the edge device (on VirtualBox it's a bootable virtual CD/DVD)
+* The ISO installer is accessible to the edge device (e.g. a bootable virtual CD/DVD or a physical USB thumb drive)
 
 The above conditions are invaluable to determine where a problem
 lies if the edge device does not provision.
 
-NB: These instructions have not been tested with a physical device
-(yet).
-
 ### Observe the FDO process during edge device initial boot
 When the edge device is first booted, the simplified ISO installer
 will copy the rpm-ostree image contents directly to the edge device
-storage. A short handshake will occur between the edge device and
-the manufacturing server to perform the initial device credential
-exchange. The edge device will then poweroff. The manufacturing
-server, onboarding server, and rendezvous server will also have
-those keys set to support provisioning the device when it is rebooted.
+storage. No kickstart file is used by the simplified installer. A
+short handshake will occur between the edge device and the manufacturing
+server to perform the initial device credential exchange. The edge
+device will then power off. The manufacturing server, onboarding
+server, and rendezvous server will also have credentials set to
+support provisioning the device when it is rebooted.
 
 The FDO onboarding process supports "late binding" where the edge
 device can be given just enough configuration at time of manufacture
 to support full on-boarding once it arrives at its intended
 destination. It's not necessary to fully provision the device all
 at once and the provisioning instructions can be changed between
-the time of manufacture and the first boot in the field, giving a
-lot of flexibility to the eventual device owner. FDO also supports,
-via the use of certs and keys, the ability to do Device Initialization
-over Untrusted Networks (DIUN). This demo does not show DIUN.
+the time of manufacture and the first time the edge device boots
+in the field, giving a lot of flexibility to the eventual device
+owner. FDO also supports, via the use of certs and keys, the ability
+to do Device Initialization over Untrusted Networks (DIUN). This
+demo does not show DIUN.
 
 ### Boot and provision the edge device
 Modify the edge device to remove the ISO installer. On VirtualBox,
 I simply remove the file from the virtual CD/DVD. Take whatever
-action is appropriate for your scenario.
+action is appropriate for your scenario. For a physical device, you
+would simply remove the USB thumb drive.
 
 Next, if the `watch` command from above is still running on the FDO
 server, terminate it using CTRL-C and then truncate the logs and
@@ -294,54 +321,44 @@ restart monitoring on the FDO server using the commands:
     sudo truncate -s 0 *.log
     watch ls -lat
 
-Start the edge device and watch the logs. The changes will occur
-quickly but what you should see is that the edge device contacts the rendezvous
-server to determine it's owner, the device and owner use shared
-credentials to authenticate to one another and then the owner uses
-the serviceinfo API server to provision the edge device. If this
-all works correctly, you'll see a container application start on
-the edge device in its console.
-
-### Verify the edge device is provisioned
-You can test that the edge device is provisioned by sending a request
-to the simple container web application that is a part of the device
-provisioning.  If the `watch` command from above is still running
-on the FDO server, terminate it using CTRL-C and then type the
-following commands to test the web application on the edge device:
-
-    curl http://YOUR-EDGE-DEVICE-IP-ADDR-OR-NAME:8080
-
-where you substitute the correct IP address or DNS name for your
-edge device.
+Continue to monitor the various FDO service logs while starting the
+edge device. The changes will occur quickly but what you should see
+is that the edge device contacts the rendezvous server to determine
+it's owner, the device and owner use shared credentials to authenticate
+to one another and then the owner uses the serviceinfo API server
+to provision the edge device. If this all works correctly, you'll
+see a container application start on the edge device in its console.
+The edge device is provisioned to run the GNOME desktop and firefox
+browser in "kiosk" mode where no user interaction is permitted to
+change configuration or run alternative applications.
 
 ### Demonstrate podman auto-update
 There are actually two versions of the container web application
 that can run on the edge device. Both versions reside in the local
 container registry running on the FDO server. This is an additional
-component to support this demo and not a typical item for the FDO
-server. The edge device has a slightly modified podman-auto-update
+capability to support this demo beyond the requirements for FDO
+provisioning. The edge device has a slightly modified podman-auto-update
 systemd service that checks the container registry every thirty
-seconds and then, if the application is different than what's
-currently running, downloads the new container image and restarts
-the application.
+seconds and then, if the container image tagged as "prod" is different
+than what's currently running, downloads the new container image
+and restarts the application.
 
-To initiate this, use the following commands in the FDO server
-terminal window:
+If the currently running container image that's tagged "prod" matches
+the container image tagged "army", you can initiate a restart using
+the following commands in the FDO server terminal window:
 
-    REGADDR=YOUR-FDO-SERVER-IP-ADDR-OR-NAME
-    podman pull --all-tags $REGADDR:5000/howsmysalute
-    podman tag $REGADDR:5000/howsmysalute:army $REGADDR:5000/howsmysalute:prod
-    podman push $REGADDR:5000/howsmysalute:prod
+    REPOID=YOUR-FDO-SERVER-IP-ADDR-OR-NAME:5000/howsmysalute
+    podman pull --all-tags $REPOID
+    podman tag $REPOID:usmc $REPOID:prod
+    podman push $REPOID:prod
 
-In the edge device console, you should see the How's My Salute application
-restart within thirty seconds.
+where YOUR-FDO-SERVER-IP-ADDR-OR-NAME matches the DNS name or IP
+address of your FDO server.
 
-To test the application, browse to the application on the edge
-device to test your salute at the
-http://YOUR-EDGE-DEVICE-IP-ADDR-OR-NAME:8080/ URL.
-
-The application should check an Army salute instead of a USMC one.
+In the edge device console, you should see the How's My Salute
+application restart within thirty seconds. The application should
+display the requirements for a US Marine Corps salute rather than
+a US Army salute.
 
 # TODO
 * initiate update to underlying rpm-ostree image as well
-* add quasi-serverless on-demand activation/deactivation to web application
