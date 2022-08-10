@@ -63,6 +63,11 @@ podman create --rm --name howsmysalute \
     --security-opt label=disable --device /dev/video0 -p 8080:8080 \
     --label io.containers.autoupdate=registry $FDO_SERVER:5000/howsmysalute:prod
 podman generate systemd --files --new --name howsmysalute
+
+# make sure the browser restarts when the container is updated
+sed -i '/^ExecStopPost..*/a ExecStopPost=/usr/bin/pkill -f firefox' \
+    container-howsmysalute.service
+
 cp container-howsmysalute.service /etc/device0/cfg/etc/systemd/system/
 podman rm -f howsmysalute
 
