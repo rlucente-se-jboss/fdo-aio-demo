@@ -21,9 +21,17 @@ cd HowsMySalute
 podman build --layers=false -t $REPO_ID:usmc .
 podman push $REPO_ID:usmc
 
+git checkout navy
+podman build --layers=false -t $REPO_ID:navy .
+podman push $REPO_ID:navy
+
 git checkout army
 podman build --layers=false -t $REPO_ID:army .
 podman push $REPO_ID:army
+
+git checkout usaf
+podman build --layers=false -t $REPO_ID:usaf .
+podman push $REPO_ID:usaf
 
 ##
 ## Tag the image as "prod" in the local insecure registry

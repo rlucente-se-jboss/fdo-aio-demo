@@ -126,8 +126,10 @@ following commands to clear out the current images and remove the
 local HowsMySalute folder:
 
     REPOID=YOUR-FDO-SERVER-IP-ADDR-OR-NAME:5000/howsmysalute
-    sudo podman rmi -f $REPOID:usmc
     sudo podman rmi -f $REPOID:army
+    sudo podman rmi -f $REPOID:navy
+    sudo podman rmi -f $REPOID:usaf
+    sudo podman rmi -f $REPOID:usmc
     sudo podman rmi -f $REPOID:prod
     sudo rm -fr HowsMySalute
     sudo ./05-build-containers.sh
