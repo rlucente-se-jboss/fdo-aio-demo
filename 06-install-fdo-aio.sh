@@ -81,17 +81,13 @@ EOF
 
 # enable firefox in kiosk mode
 mkdir -p /etc/device0/cfg/home/$EDGE_USER/.local/bin
-cat > /etc/device0/cfg/home/$EDGE_USER/.local/bin/redhat-kiosk << EOF
+cat > /etc/device0/cfg/home/$EDGE_USER/.local/bin/redhat-kiosk << 'EOF'
 #!/bin/sh
-EDGE_CLIENT=${EDGE_CLIENT}
 
-EOF
-
-cat >> /etc/device0/cfg/home/$EDGE_USER/.local/bin/redhat-kiosk << 'EOF'
 while true; do
-    if [ -n "$(curl -s --head --request GET http://$EDGE_CLIENT:8080 | grep "200 OK")" ]
+    if [ -n "$(curl -s --head --request GET http://localhost:8080 | grep '200 OK')" ]
     then
-    	firefox -kiosk http://$EDGE_CLIENT:8080
+    	firefox -kiosk http://localhost:8080
     fi
     sleep 1
 done

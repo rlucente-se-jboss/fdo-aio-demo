@@ -49,12 +49,10 @@ network interface on the FDO server. The `EDGE_USER`, `EDGE_PASS`,
 and `EDGE_STORAGE_DEV` parameters define the login information for
 the virtual edge device as well as the base storage device. The
 default storage device is correct for VirtualBox but may be different
-for another solution. Finally, the EDGE_CLIENT is the IP address
-for the edge device itself. My VirtualBox host-only DHCP server is
-configured to give predictable IP addresses to both the FDO server
-and the Edge client. Make sure to do something similar for your
-environment and/or adjust both the `FDO_SERVER` and `EDGE_CLIENT`
-settings in the `demo.conf` file.
+for another solution. My VirtualBox host-only DHCP server is
+configured to give a predictable IP address to the FDO server. Make
+sure to do something similar for your environment and/or adjust the
+`FDO_SERVER` setting in the `demo.conf` file.
 
 ## Configure the FDO server
 The shell scripts included in this repository handle setting up all
