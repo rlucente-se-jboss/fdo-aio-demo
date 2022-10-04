@@ -1,2 +1,5 @@
 # ignore any ISO files
 *.iso
+
+# ignore any saved files
+*.bak
