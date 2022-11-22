@@ -33,6 +33,10 @@ git checkout usaf
 podman build --layers=false -t $REPO_ID:usaf .
 podman push $REPO_ID:usaf
 
+git checkout ussf
+podman build --layers=false -t $REPO_ID:ussf .
+podman push $REPO_ID:ussf
+
 ##
 ## Tag the image as "prod" in the local insecure registry
 ##
