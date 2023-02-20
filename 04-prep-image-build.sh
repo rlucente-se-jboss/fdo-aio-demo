@@ -123,6 +123,14 @@ name = "gnome-session-kiosk-session"
 version = "*"
 
 [[packages]]
+name = "liberation-narrow-fonts.noarch"
+version = "*"
+
+[[packages]]
+name = "liberation-sans-fonts.noarch"
+version = "*"
+
+[[packages]]
 name = "firefox"
 version = "*"
 
