@@ -7,12 +7,14 @@ podman pull --all-tags $REPOID
 podman tag $REPOID:$1 $REPOID:prod
 podman push $REPOID:prod
 
+TICKS=45
+
 echo
-for i in {1..45}
+for i in $(seq 1 $TICKS)
 do
-    echo -n "."
+    VAL=$(( i / 10 % 10 ))
+    ((i % 10 )) && echo -n "." || echo -n $VAL
     sleep 1
 done
 echo
 echo
-
