@@ -11,7 +11,7 @@
 dnf -y install git
 
 ##
-## Create containerized HowsMySalute application for USMC salute
+## Create containerized HowsMySalute application
 ##
 
 REPO_ID=$FDO_SERVER:5000/howsmysalute
