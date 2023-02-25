@@ -18,7 +18,7 @@ cp $HOME/.ssh/id_$EDGE_USER.pub .
 
 cat > edge-blueprint.toml <<EOF
 name = "Edge"
-description = ""
+description = "Edge in kiosk mode"
 version = "0.0.1"
 
 EOF
@@ -31,8 +31,12 @@ name = "container-tools"
 version = "*"
 EOF
 else
-    # all of these packages mirror the container-tools module
+    # all of these packages mirror the container-tools module per 2023-02-24
     cat >> edge-blueprint.toml <<EOF
+[[packages]]
+name = "aardvark-dns"
+version = "*"
+
 [[packages]]
 name = "buildah"
 version = "*"
@@ -74,6 +78,10 @@ name = "libslirp"
 version = "*"
 
 [[packages]]
+name = "netavark"
+version = "*"
+
+[[packages]]
 name = "podman"
 version = "*"
 
@@ -101,19 +109,11 @@ version = "*"
 name = "udica"
 version = "*"
 
-[[packages]]
-name = "setroubleshoot-server"
-version = "*"
-
-# appears to be a missing gdm dependency for RHEL 8
-[[packages]]
-name = "flatpak-selinux"
-version = "*"
-
 EOF
 fi
 
 cat >> edge-blueprint.toml <<EOF
+# kiosk mode GUI tools
 [[packages]]
 name = "gdm"
 version = "*"
