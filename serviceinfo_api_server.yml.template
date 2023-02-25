@@ -58,15 +58,6 @@ service_info:
   - command: firewall-cmd
     args:
     - --reload
-  - command: cp
-    args:
-    - /usr/share/accountsservice/user-templates/standard
-    - /etc/accountsservice/user-templates/standard
-  - command: sed
-    args:
-    - -i.bak
-    - 's/Session=.*/Session=com.redhat.Kiosk\nSystemAccount=false/g'
-    - /etc/accountsservice/user-templates/standard
   - command: mkdir
     args:
     - -p
@@ -79,6 +70,11 @@ service_info:
     args:
     - -i.bak
     - '/^\[daemon\]/a AutomaticLoginEnable=True\nAutomaticLogin=${EDGE_USER}\n'
+    - /etc/gdm/custom.conf
+  - command: sed
+    args:
+    - -i
+    - 's/^#\(WaylandEnable=false\)/\1/g'
     - /etc/gdm/custom.conf
   - command: setsebool
     args:

@@ -115,6 +115,10 @@ fi
 cat >> edge-blueprint.toml <<EOF
 # kiosk mode GUI tools
 [[packages]]
+name = "xorg-x11-server-Xorg"
+version = "*"
+
+[[packages]]
 name = "gdm"
 version = "*"
 
